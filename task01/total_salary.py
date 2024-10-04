@@ -1,5 +1,10 @@
 import pathlib
 
+
+class EmptyListException(Exception):
+    '''Raise specific situation when the file is found but it is empty'''
+
+
 def total_salary(filename: str) -> tuple:
     '''Calculates total salary and average salary for the staff enumerated in the text file\n
     ARGS:
@@ -7,12 +12,13 @@ def total_salary(filename: str) -> tuple:
     RETURNS:
         tuple with total_salary and average_salary in float format    
     '''
-    staff = load_data(filename)
-    prepared_data = clean_data(staff)
-    total_salary = 0
-    number_of_staff = len(prepared_data)
+    raw_data = load_data(filename)
+    staff = clean_data(raw_data)
     
-    for person in prepared_data:
+    total_salary = 0
+    number_of_staff = len(staff)
+    
+    for person in staff:
         total_salary += float(person["salary"])
     
     try:    
@@ -23,21 +29,27 @@ def total_salary(filename: str) -> tuple:
     return (total_salary, average_salary)
 
 
-def load_data(filename: str) -> list[str]:
+def load_data(filename: str) -> list:
+    '''Loads data from the file with names and salaries\n
+    ARGS:
+        filename where data is saved
+    RETURNS:
+        list of lines from the file
+    '''
     current_dir = pathlib.Path(__file__).parent
     file = current_dir / filename
     try:
         with open(file, 'r', encoding='utf-8') as file_handler:
-            staff = []
+            raw_data = []
             while True:
-                person = file_handler.readline()
-                if  person == "" or person == "\n":
+                line = file_handler.readline()
+                if  line == "" or line == "\n":
                     break
-                staff.append(person)
-            if len(staff) == 0:
+                raw_data.append(line)
+            if len(raw_data) == 0:
                 raise EmptyListException()
             else:    
-                return staff
+                return raw_data
     except IOError:
         print(f"Error: File not found")
         return []
@@ -46,22 +58,24 @@ def load_data(filename: str) -> list[str]:
         return []
 
 
-def clean_data(staff: list) -> list[dict]:
-    result = []
-    for person in staff:
+def clean_data(raw_data: list) -> list[dict]:
+    '''Processes the raw data from the file\n
+    ARGS:
+        List of lines corresponding to lines from the data file
+    RETURNS:
+        List of dictionaries with personal info about each member of staff 
+    '''
+    staff = []
+    for person in raw_data:
         stripped = person.strip()
         person_info = stripped.split(',')
         staff_member = {
             "full_name": person_info[0],
             "salary": person_info[1]
         }
-        result.append(staff_member)
+        staff.append(staff_member)
 
-    return result
-
-
-class EmptyListException(Exception):
-    '''Raise specific situation when the file is found but it is empty'''
+    return staff
 
 
 print(f"Correct file:", format(total_salary("salaries.txt")))
