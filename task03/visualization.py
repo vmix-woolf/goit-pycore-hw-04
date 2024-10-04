@@ -13,14 +13,14 @@ def parse_directory(pathname: str, recursive: bool = False, level: int = 0):
         nothing. Simply it output names of dirs and files with differenet colors     
     '''
     if not level:
-        print(Fore.GREEN + pathname + "/")
+        print(Fore.GREEN + pathname + "/")  # for zero level
     
     for path in Path(pathname).iterdir():
-        prefix = "  "
+        prefix = "  "  # indentation 2 spaces for next level of nesting
         name = path.as_posix().split("/")[-1]
     
         if path.is_dir():
-            pattern = re.compile(r"__\w+__")
+            pattern = re.compile(r"__\w+__")  # avoid service directories
             if re.search(pattern, path.as_posix()):
                 continue
 
@@ -28,7 +28,7 @@ def parse_directory(pathname: str, recursive: bool = False, level: int = 0):
             print(Fore.GREEN + prefix * level + name + Fore.RESET)
             
             if recursive:
-                parse_directory(path.as_posix(), True, level)
+                parse_directory(path.as_posix(), True, level)  # recursive call
                 level -= 1
         else:
             level += 1
